@@ -3,177 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="theme-color" content="#0b1120">
+  <meta
+    name="description"
+    content="Compare seu currículo com uma vaga e revise cada evidência antes de gerar o PDF."
+  >
   <title>Adaptador de Currículo</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <main class="container">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Adaptador de Currículo — início">
+      <svg
+        class="brand-mark"
+        viewBox="0 0 40 40"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M8 29 18 19l7 7 8-14" />
+        <circle cx="8" cy="29" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <circle cx="25" cy="26" r="3" />
+        <circle cx="33" cy="12" r="3" />
+      </svg>
+      <span>Adaptador de currículo</span>
+    </a>
+    <p class="local-indicator">
+      <span aria-hidden="true"></span>
+      Processamento local
+    </p>
+  </header>
 
-    <header>
-      <h1>Adaptador de Currículo</h1>
-
-      <p>
-        Envie seu currículo e as informações da vaga para preparar
-        uma versão adaptada à oportunidade.
-      </p>
-    </header>
-
-    <section id="tela-envio">
-      <form id="formulario">
-
-        <label for="arquivo">
-          Seu currículo em PDF
-        </label>
-
-        <input
-          type="file"
-          id="arquivo"
-          accept=".pdf,application/pdf"
-          required
-        >
-
-        <label for="imagem-vaga">
-          Prints da vaga
-        </label>
-
-        <input
-          type="file"
-          id="imagem-vaga"
-          accept="image/png,image/jpeg,image/webp"
-          multiple
-        >
-
-        <p class="legenda">
-          Cole um ou mais prints com <strong>Ctrl + V</strong>, selecione
-          imagens no computador ou informe a descrição em texto abaixo.
+  <main class="main-shell">
+    <section class="story-hero" aria-labelledby="hero-title">
+      <div class="story-copy">
+        <h1 id="hero-title">
+          Da sua experiência<br>
+          <span>à vaga, com evidências.</span>
+        </h1>
+        <p class="hero-description">
+          Compare o que a oportunidade pede com o que já está no seu
+          currículo. Você decide quais sugestões fazem sentido.
         </p>
+        <p class="story-note">
+          Nada é acrescentado sem aparecer no currículo. Cada etapa fica
+          visível para você conferir.
+        </p>
+      </div>
 
-        <div id="lista-prints"></div>
+      <div class="route-guide">
+        <h2>Do material à decisão</h2>
+        <ol
+          id="rota-progresso"
+          class="route-list"
+          aria-label="Etapas da comparação"
+        >
+          <li class="route-step is-current" aria-current="step">
+            <span class="route-point" aria-hidden="true">01</span>
+            <span>
+              <strong>Preparar</strong>
+              <small>Currículo e vaga</small>
+            </span>
+          </li>
+          <li class="route-step">
+            <span class="route-point" aria-hidden="true">02</span>
+            <span>
+              <strong>Comparar</strong>
+              <small>Requisitos e evidências</small>
+            </span>
+          </li>
+          <li class="route-step">
+            <span class="route-point" aria-hidden="true">03</span>
+            <span>
+              <strong>Decidir</strong>
+              <small>Revisar antes do PDF</small>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </section>
 
-        <label for="vaga">
-          Descrição da vaga em texto
-        </label>
+    <section
+      id="tela-envio"
+      class="task-panel"
+      aria-labelledby="form-heading"
+    >
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">01</span>
+        <div>
+          <h2 id="form-heading" tabindex="-1">Comece pelo que já existe</h2>
+          <p>
+            Traga seu currículo e a descrição da oportunidade para iniciar
+            uma comparação baseada em fontes.
+          </p>
+        </div>
+      </div>
 
-        <textarea
-          id="vaga"
-          placeholder="Se preferir, cole aqui a descrição e os requisitos da vaga..."
-        ></textarea>
+      <form id="formulario">
+        <div class="materials-grid">
+          <section class="material-group" aria-labelledby="curriculo-heading">
+            <div class="field-heading">
+              <h3 id="curriculo-heading">Seu currículo</h3>
+              <span>PDF</span>
+            </div>
+            <label class="field-label" for="arquivo">Arquivo do currículo</label>
+            <input
+              type="file"
+              id="arquivo"
+              accept=".pdf,application/pdf"
+              aria-describedby="arquivo-ajuda"
+              required
+            >
+            <p id="arquivo-ajuda" class="field-help">
+              Use um PDF com texto selecionável. O conteúdo é lido para
+              localizar evidências.
+            </p>
+          </section>
 
-        <section id="confirmacao-vaga" class="detalhes" hidden>
+          <section class="material-group" aria-labelledby="vaga-heading">
+            <div class="field-heading">
+              <h3 id="vaga-heading">A oportunidade</h3>
+              <span>Texto ou imagens</span>
+            </div>
+            <label class="field-label" for="vaga">Descrição da vaga</label>
+            <textarea
+              id="vaga"
+              rows="7"
+              aria-describedby="vaga-ajuda"
+              placeholder="Cole aqui a descrição e os requisitos da vaga..."
+            ></textarea>
+            <p id="vaga-ajuda" class="field-help">
+              Também pode enviar prints abaixo. Se preencher este campo,
+              o texto será usado e os prints não serão enviados.
+            </p>
+
+            <label class="field-label image-label" for="imagem-vaga">
+              Adicionar prints da vaga
+            </label>
+            <input
+              type="file"
+              id="imagem-vaga"
+              accept="image/png,image/jpeg,image/webp"
+              aria-describedby="prints-ajuda"
+              multiple
+            >
+            <p id="prints-ajuda" class="field-help">
+              PNG, JPEG ou WebP; até 5 imagens. Você também pode colar
+              uma captura com Ctrl + V.
+            </p>
+            <div id="lista-prints"></div>
+          </section>
+        </div>
+
+        <section id="confirmacao-vaga" class="confirmation-panel" hidden>
           <h3>Confira o texto extraído dos prints</h3>
           <p>
             Corrija a transcrição, se necessário. A comparação só começa
             depois que você confirmar este texto.
           </p>
-          <label for="texto-transcrito">Texto da vaga para confirmar</label>
-          <textarea id="texto-transcrito"></textarea>
-          <button type="button" id="confirmar-vaga">
+          <label class="field-label" for="texto-transcrito">
+            Texto da vaga para confirmar
+          </label>
+          <textarea id="texto-transcrito" rows="8"></textarea>
+          <button type="button" id="confirmar-vaga" class="button-primary">
             Confirmar texto e comparar
           </button>
         </section>
 
-        <p class="aviso">
-          Os arquivos são processados localmente pelo Ollama. Prints são
-          transcritos para sua confirmação antes da comparação.
-        </p>
-
-        <button type="submit" id="botao-analisar">
-          Preparar comparação
-        </button>
-
-        <p id="mensagem" role="status" aria-live="polite"></p>
-
+        <div class="form-footer">
+          <p class="privacy-note">
+            <svg
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="4" y="8" width="12" height="9" rx="2" />
+              <path d="M7 8V5a3 3 0 0 1 6 0v3" />
+            </svg>
+            Processado localmente pelo Ollama. A transcrição dos prints
+            precisa da sua confirmação.
+          </p>
+          <div class="form-actions">
+            <button type="submit" id="botao-analisar" class="button-primary">
+              Comparar currículo e vaga
+              <svg
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M3 10h13M10 4l6 6-6 6" />
+              </svg>
+            </button>
+            <p id="mensagem" role="status" aria-live="polite"></p>
+          </div>
+        </div>
       </form>
     </section>
 
-    <section id="tela-resultado" hidden>
+    <section
+      id="tela-resultado"
+      class="task-panel results-screen"
+      aria-labelledby="resultado-titulo"
+      hidden
+    >
+      <div class="results-heading">
+        <div>
+          <span class="section-number" aria-hidden="true">03</span>
+          <h2 id="resultado-titulo" tabindex="-1">
+            O que a vaga pede — e o que seu currículo mostra
+          </h2>
+          <p>
+            Confira as citações e decida se deseja aplicar alguma sugestão.
+            “Não identificado” não significa que você não tenha a habilidade.
+          </p>
+        </div>
+        <button type="button" id="botao-voltar" class="button-secondary">
+          Editar informações
+        </button>
+      </div>
 
-      <h2>Comparação do currículo</h2>
-
-      <p>
-        Confira todas as informações antes de usar a versão adaptada.
-      </p>
+      <p id="resumo-analise" class="summary-line" aria-live="polite"></p>
 
       <div class="comparacao">
-
-        <div class="coluna">
-          <h3>Currículo original</h3>
-
-          <p class="legenda">
-            Texto extraído do PDF enviado.
-          </p>
-
+        <section class="coluna" aria-labelledby="original-heading">
+          <h3 id="original-heading">Currículo original</h3>
+          <p class="field-help">Texto extraído do PDF enviado.</p>
           <pre id="curriculo-original"></pre>
-        </div>
+        </section>
 
-        <div class="coluna">
-          <h3>Currículo adaptado</h3>
-
-          <p class="legenda">
-            Confira as sugestões da inteligência artificial.
+        <section class="coluna" aria-labelledby="adaptado-heading">
+          <h3 id="adaptado-heading">Sugestões de alteração</h3>
+          <p class="field-help">
+            Selecione apenas o que corresponde à sua experiência.
           </p>
-
           <pre id="curriculo-adaptado"></pre>
-        </div>
-
+        </section>
       </div>
 
-      <div class="detalhes">
-        <h3>Alterações e requisitos da vaga</h3>
-
+      <section class="details-block" aria-label="Requisitos e evidências">
         <div id="alteracoes"></div>
-      </div>
+      </section>
 
-      <div class="detalhes">
-        <h3>Prévia do PDF</h3>
-
-        <p>
-          Escolha as sugestões desejadas e gere a prévia. Sem alterações
-          selecionadas, a prévia e o download correspondem ao PDF original.
-          Confira o resultado antes de baixar; o layout pode variar entre PDFs.
-        </p>
-
-        <button type="button" id="gerar-pdf">
+      <section class="pdf-review" aria-labelledby="pdf-heading">
+        <div>
+          <h3 id="pdf-heading">Confira antes de baixar</h3>
+          <p>
+            Gere uma prévia para conferir o resultado. Sem sugestões
+            selecionadas, o arquivo continua sendo o PDF original.
+          </p>
+        </div>
+        <button type="button" id="gerar-pdf" class="button-primary">
           Gerar prévia do PDF
         </button>
-
-        <p id="pdf-mensagem" role="status"></p>
-
+        <p id="pdf-mensagem" role="status" aria-live="polite"></p>
         <iframe
           id="pdf-previa"
           title="Prévia do currículo em PDF"
-          style="width: 100%; height: 600px; border: 1px solid #dce3ed;"
+          loading="lazy"
           hidden
         ></iframe>
-
-        <a
-          id="pdf-download"
-          download="curriculo_adaptado.pdf"
-          hidden
-        >
+        <a id="pdf-download" class="download-link" download="curriculo_adaptado.pdf" hidden>
           Baixar PDF
         </a>
-      </div>
-
-      <button
-        type="button"
-        id="botao-voltar"
-        class="secundario"
-      >
-        Voltar
-      </button>
-
+      </section>
     </section>
-
   </main>
 
-  <!-- Biblioteca responsável por ler PDFs no navegador. -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <footer class="site-footer">
+    Revise os dados e a prévia antes de usar o currículo em uma candidatura.
+  </footer>
 
-  <!-- JavaScript do projeto. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

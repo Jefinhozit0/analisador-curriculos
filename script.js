@@ -9,6 +9,9 @@ const botaoConfirmarVaga = document.querySelector("#confirmar-vaga");
 const listaPrints = document.querySelector("#lista-prints");
 const mensagem = document.querySelector("#mensagem");
 const botaoAnalisar = document.querySelector("#botao-analisar");
+const resumoAnalise = document.querySelector("#resumo-analise");
+const rotaProgresso = document.querySelector("#rota-progresso");
+const etapasRota = document.querySelectorAll(".route-step");
 
 // Telas.
 const telaEnvio = document.querySelector("#tela-envio");
@@ -47,6 +50,42 @@ const imagensVaga = [];
 
 // Guarda os prints selecionados para remoção.
 const printsSelecionados = new Set();
+
+function atualizarEtapa(etapaAtual) {
+  const ultimaEtapa = etapasRota.length;
+  const progresso = ultimaEtapa > 1
+    ? (etapaAtual - 1) / (ultimaEtapa - 1)
+    : 0;
+
+  rotaProgresso.style.setProperty("--progresso-rota", progresso);
+
+  etapasRota.forEach(function (etapa, indice) {
+    const numeroEtapa = indice + 1;
+    const atual = numeroEtapa === etapaAtual;
+
+    etapa.classList.toggle("is-current", atual);
+    etapa.classList.toggle("is-complete", numeroEtapa < etapaAtual);
+
+    if (atual) {
+      etapa.setAttribute("aria-current", "step");
+    } else {
+      etapa.removeAttribute("aria-current");
+    }
+  });
+}
+
+function voltarAoTopo() {
+  const reduzirMovimento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  window.scrollTo({
+    top: 0,
+    behavior: reduzirMovimento ? "auto" : "smooth"
+  });
+}
+
+atualizarEtapa(1);
 
 function verificarOrigemLocal() {
   const hostLocal = ["localhost", "127.0.0.1"].includes(
@@ -165,7 +204,7 @@ if (typeof pdfjsLib !== "undefined") {
 
 // Cria o bloco que contém todos os prints.
 const blocoPrints = document.createElement("div");
-blocoPrints.className = "detalhes";
+blocoPrints.className = "print-gallery";
 blocoPrints.hidden = true;
 
 const tituloPrints = document.createElement("h3");
@@ -177,13 +216,11 @@ instrucaoPrints.textContent =
   "Clique nos prints que deseja remover e depois use o botão abaixo.";
 
 const galeriaPrints = document.createElement("div");
-galeriaPrints.style.display = "flex";
-galeriaPrints.style.flexWrap = "wrap";
-galeriaPrints.style.gap = "12px";
+galeriaPrints.className = "print-gallery-grid";
 
 const botaoRemoverSelecionados = document.createElement("button");
 botaoRemoverSelecionados.type = "button";
-botaoRemoverSelecionados.className = "secundario";
+botaoRemoverSelecionados.className = "button-secondary";
 botaoRemoverSelecionados.textContent = "Remover prints selecionados";
 botaoRemoverSelecionados.disabled = true;
 
@@ -212,13 +249,7 @@ function atualizarGaleria() {
       String(selecionado)
     );
 
-    if (selecionado) {
-      registro.botao.style.borderColor = "#2563eb";
-      registro.botao.style.background = "#dbeafe";
-    } else {
-      registro.botao.style.borderColor = "#cbd5e1";
-      registro.botao.style.background = "#ffffff";
-    }
+    registro.botao.classList.toggle("is-selected", selecionado);
   });
 
   blocoPrints.hidden = imagensVaga.length === 0;
@@ -239,23 +270,11 @@ function adicionarPrint(arquivo) {
 
   const botao = document.createElement("button");
   botao.type = "button";
-
-  botao.style.display = "flex";
-  botao.style.alignItems = "center";
-  botao.style.justifyContent = "center";
-  botao.style.width = "180px";
-  botao.style.maxWidth = "100%";
-  botao.style.margin = "0";
-  botao.style.padding = "8px";
-  botao.style.border = "2px solid #cbd5e1";
-  botao.style.borderRadius = "8px";
-  botao.style.cursor = "pointer";
+  botao.className = "print-option";
 
   const imagem = document.createElement("img");
   imagem.src = endereco;
-  imagem.style.width = "100%";
-  imagem.style.height = "120px";
-  imagem.style.objectFit = "contain";
+  imagem.loading = "lazy";
 
   botao.appendChild(imagem);
 
@@ -482,6 +501,18 @@ function mostrarResultado(resultado, textoOriginal) {
     ? resultado.requisitos
     : [];
 
+  const totalRequisitos = `${requisitos.length} ${
+    requisitos.length === 1
+      ? "requisito analisado"
+      : "requisitos analisados"
+  }`;
+  const totalSugestoes = `${sugestoes.length} ${
+    sugestoes.length === 1 ? "sugestão opcional" : "sugestões opcionais"
+  }`;
+
+  resumoAnalise.textContent =
+    `${totalRequisitos} na vaga · ${totalSugestoes} para revisar.`;
+
   if (requisitos.length === 0) {
     const paragrafo = document.createElement("p");
     paragrafo.textContent =
@@ -616,6 +647,10 @@ botaoConfirmarVaga.addEventListener("click", function () {
 formulario.addEventListener("submit", async function (evento) {
   evento.preventDefault();
 
+  if (botaoAnalisar.disabled) {
+    return;
+  }
+
   try {
     verificarOrigemLocal();
   } catch (erro) {
@@ -656,6 +691,10 @@ formulario.addEventListener("submit", async function (evento) {
   }
 
   botaoAnalisar.disabled = true;
+  botaoAnalisar.classList.add("is-loading");
+  botaoAnalisar.setAttribute("aria-busy", "true");
+  botaoConfirmarVaga.disabled = true;
+  atualizarEtapa(2);
   mensagem.textContent = "Lendo o currículo...";
 
   try {
@@ -673,16 +712,18 @@ formulario.addEventListener("submit", async function (evento) {
     dados.append("curriculo", textoCurriculo);
     dados.append("vaga", descricaoVaga);
 
-    imagensVaga.forEach(function (registro, indice) {
-      const nomeArquivo =
-        registro.arquivo.name || `print-${indice + 1}.png`;
+    if (!descricaoVaga) {
+      imagensVaga.forEach(function (registro, indice) {
+        const nomeArquivo =
+          registro.arquivo.name || `print-${indice + 1}.png`;
 
-      dados.append(
-        "imagens",
-        registro.arquivo,
-        nomeArquivo
-      );
-    });
+        dados.append(
+          "imagens",
+          registro.arquivo,
+          nomeArquivo
+        );
+      });
+    }
 
     mensagem.textContent =
       "Analisando com a IA local. Isso pode levar alguns minutos...";
@@ -717,8 +758,9 @@ formulario.addEventListener("submit", async function (evento) {
     mensagem.textContent = "";
     telaEnvio.hidden = true;
     telaResultado.hidden = false;
-
-    window.scrollTo(0, 0);
+    telaResultado.classList.add("is-entering");
+    atualizarEtapa(3);
+    voltarAoTopo();
   } catch (erro) {
     console.error("Erro ao preparar a análise:", erro);
 
@@ -727,6 +769,13 @@ formulario.addEventListener("submit", async function (evento) {
       "Não foi possível fazer a análise. Confira se o servidor está aberto.";
   } finally {
     botaoAnalisar.disabled = false;
+    botaoAnalisar.classList.remove("is-loading");
+    botaoAnalisar.removeAttribute("aria-busy");
+    botaoConfirmarVaga.disabled = false;
+
+    if (telaResultado.hidden) {
+      atualizarEtapa(1);
+    }
   }
 });
 
@@ -734,8 +783,10 @@ formulario.addEventListener("submit", async function (evento) {
 botaoVoltar.addEventListener("click", function () {
   telaResultado.hidden = true;
   telaEnvio.hidden = false;
-
-  window.scrollTo(0, 0);
+  telaResultado.classList.remove("is-entering");
+  atualizarEtapa(1);
+  voltarAoTopo();
+  document.querySelector("#form-heading").focus();
 });
 
 // Gera uma cópia do PDF com as sugestões selecionadas.
@@ -773,6 +824,8 @@ gerarPdf.addEventListener("click", async function () {
   dados.append("alteracoes", JSON.stringify(escolhas));
 
   gerarPdf.disabled = true;
+  gerarPdf.classList.add("is-loading");
+  gerarPdf.setAttribute("aria-busy", "true");
   pdfMensagem.textContent = "Preparando PDF...";
   pdfPrevia.hidden = true;
   pdfDownload.hidden = true;
@@ -814,5 +867,7 @@ gerarPdf.addEventListener("click", async function () {
       erro.message || "Erro ao gerar o PDF.";
   } finally {
     gerarPdf.disabled = false;
+    gerarPdf.classList.remove("is-loading");
+    gerarPdf.removeAttribute("aria-busy");
   }
 });
